@@ -355,48 +355,48 @@ def get_mpims(bot):
     redis_client = omniredis.get_redis_client()
     return redis_client.hscan_iter('mpims:{}'.format(bot.team.name))
 
+# These are no longer supported for bots
+# def _get_emoji(bot):
+#     # TODO: split this retry logic into a generic retry function
+#     for retry in range(MAX_RETRIES):
+#         resp = client(bot).api_call('emoji.list')
+#         if resp['ok']:
+#             break
+#         logger.warning(
+#             'Call to emoji.list failed, attempting retry',
+#             extra={
+#                 'retry': retry,
+#                 'error': resp.get('error'),
+#                 'bot': bot.name,
+#             },
+#         )
+#         gevent.sleep(GEVENT_SLEEP_TIME)
+#     else:
+#         logger.error(
+#             'Exceeded max retries when calling emoji.list.',
+#             extra={'bot': bot.name},
+#         )
+#         return {}
 
-def _get_emoji(bot):
-    # TODO: split this retry logic into a generic retry function
-    for retry in range(MAX_RETRIES):
-        resp = client(bot).api_call('emoji.list')
-        if resp['ok']:
-            break
-        logger.warning(
-            'Call to emoji.list failed, attempting retry',
-            extra={
-                'retry': retry,
-                'error': resp.get('error'),
-                'bot': bot.name,
-            },
-        )
-        gevent.sleep(GEVENT_SLEEP_TIME)
-    else:
-        logger.error(
-            'Exceeded max retries when calling emoji.list.',
-            extra={'bot': bot.name},
-        )
-        return {}
-
-    emoji = {}
-    for k, v in resp['emoji'].items():
-        while v.startswith('alias:'):
-            _, _, alias = v.partition(':')
-            v = resp['emoji'].get(alias, '')
-        if v:
-            emoji[k] = v
-    return emoji
-
-
-def update_emoji(bot):
-    redis_client = omniredis.get_redis_client()
-    for k, v in _get_emoji(bot).items():
-        redis_client.hset('emoji:{}'.format(bot.team.name), k, v)
+#     emoji = {}
+#     for k, v in resp['emoji'].items():
+#         while v.startswith('alias:'):
+#             _, _, alias = v.partition(':')
+#             v = resp['emoji'].get(alias, '')
+#         if v:
+#             emoji[k] = v
+#     return emoji
 
 
-def get_emoji(bot, name):
-    redis_client = omniredis.get_redis_client()
-    return redis_client.hget('emoji:{}'.format(bot.team.name), name)
+# def update_emoji(bot):
+#     redis_client = omniredis.get_redis_client()
+#     for k, v in _get_emoji(bot).items():
+#         redis_client.hset('emoji:{}'.format(bot.team.name), k, v)
+
+
+# def get_emoji(bot, name):
+#     redis_client = omniredis.get_redis_client()
+#     return redis_client.hget('emoji:{}'.format(bot.team.name), name)
 
 
 def _get_channel_from_cache(bot, channel):
